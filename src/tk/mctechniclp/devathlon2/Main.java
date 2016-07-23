@@ -1,19 +1,29 @@
 package tk.mctechniclp.devathlon2;
 
+import java.io.File;
+import java.io.IOException;
+
 import net.md_5.bungee.BungeeCord;
 import net.md_5.bungee.api.plugin.Plugin;
+import net.md_5.bungee.config.Configuration;
+import net.md_5.bungee.config.ConfigurationProvider;
+import net.md_5.bungee.config.YamlConfiguration;
+import tk.mctechniclp.devathlon2.listeners.ChannelListener;
 import tk.mctechniclp.devathlon2.listeners.JoinListener;
 import tk.mctechniclp.devathlon2.listeners.PingListener;
 
 public class Main extends Plugin {
 	
-	public static Main INSTANCE;
+	private static Main instance;
+	private static Configuration config;
 	
 	@Override
 	public void onEnable() {
-		INSTANCE = this;
+		instance = this;
+		initConfig();
 		registerListeners();
 		registerCommands();
+		
 	}
 	
 	@Override
@@ -25,9 +35,45 @@ public class Main extends Plugin {
 	private void registerListeners() {
 		BungeeCord.getInstance().getPluginManager().registerListener(this, new JoinListener());
 		BungeeCord.getInstance().getPluginManager().registerListener(this, new PingListener());
+		BungeeCord.getInstance().getPluginManager().registerListener(this, new ChannelListener());
 	}
 	
 	private void registerCommands() {
 		
+	}
+	
+	private void initConfig() {
+		try {
+			if(!getDataFolder().exists()) getDataFolder().mkdir();
+			
+			File file = new File(getDataFolder().getPath() + "/config.yml");
+			if(!file.exists()) {
+				file.createNewFile();
+				config = ConfigurationProvider.getProvider(YamlConfiguration.class).load(file);
+				
+				config.set("minPort", 25668);
+				config.set("maxPort", 30000);
+				config.set("lockedPorts", new int[] {12345, 23456});
+				config.set("host", "localhost");
+				config.set("maxRAMPerServer", "512");
+				config.set("maxTotalRAM", "2048");
+				config.set("MOTD", "&bSelected Server: &6&l{serverName}");
+				
+				ConfigurationProvider.getProvider(YamlConfiguration.class).save(config, file);
+			} else {
+				config = ConfigurationProvider.getProvider(YamlConfiguration.class).load(file);
+			}
+			
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public static Main getInstance() {
+		return instance;
+	}
+	
+	public static Configuration getConfig() {
+		return config;
 	}
 }

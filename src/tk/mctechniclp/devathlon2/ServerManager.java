@@ -21,9 +21,10 @@ import net.md_5.bungee.api.connection.ProxiedPlayer;
 
 public class ServerManager {
 	/** TODO: Make configurable */
-	private static int port = 25568;
-	private static int ramPerServer = 512;
-	private static String host = "localhost";
+	private static int port = Main.getConfig().getInt("minPort");
+	private static int maxPort = Main.getConfig().getInt("minPort");
+	private static int ramPerServer = Main.getConfig().getInt("maxRAMPerServer");
+	private static String host = Main.getConfig().getString("host");
 	
 	private static ArrayList<String> startingServers = new ArrayList<String>();
 	private static HashMap<UUID, String> waitingPlayers = new HashMap<UUID, String>();
@@ -33,15 +34,11 @@ public class ServerManager {
 			if(!startingServers.contains(serverName)) startServer(serverName);
 			waitingPlayers.put(p.getUniqueId(), serverName);
 		}
+		
 	}
 	
 	private static void startServer(String name) {
 		startingServers.add(name);
-		
-		/** Connect to BungeeCord */
-		ServerInfo serverInfo = ProxyServer.getInstance().constructServerInfo(name, new InetSocketAddress(host, port), "Servername: " + name, false);
-		ProxyServer.getInstance().getServers().put(name, serverInfo);
-		
 		
 		/** Start Bukkit Server */
 		File serverDir = new File("../" + name);
@@ -62,6 +59,11 @@ public class ServerManager {
 			e.printStackTrace();
 		}
 		
+		/** Connect to BungeeCord */
+		ServerInfo serverInfo = ProxyServer.getInstance().constructServerInfo(name, new InetSocketAddress(host, port), "Servername: " + name, false);
+		ProxyServer.getInstance().getServers().put(name, serverInfo);
+		
+		
 		port++;
 		startingServers.remove(name);
 		
@@ -77,10 +79,8 @@ public class ServerManager {
 		}
 	}
 	
-	public static void stopServer(String name) {
-		ProxyServer.getInstance().getServers().get(name);
-		//TODO CONTINUE
-		
+	public static void unregisterServer(String name) {
+		ProxyServer.getInstance().getServers().remove(name);
 	}
 	
 	private static void copyDirectory(File from, File to) {
