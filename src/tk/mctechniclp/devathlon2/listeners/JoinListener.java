@@ -10,8 +10,8 @@ public class JoinListener implements Listener {
 	
 	@EventHandler
 	public void onJoin(PostLoginEvent ev) {
-		String[] parts = ev.getPlayer().getPendingConnection().getVirtualHost().getHostString().split(".");
-		System.out.println(parts[0]);
+		String[] parts = ev.getPlayer().getPendingConnection().getVirtualHost().getHostString().split("\\.");
+		
 		if(parts.length == 3) {
 			ServerManager.reconnectPlayer(ev.getPlayer(), parts[0].toLowerCase());
 		}

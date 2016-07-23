@@ -3,6 +3,7 @@ package tk.mctechniclp.devathlon2;
 import net.md_5.bungee.BungeeCord;
 import net.md_5.bungee.api.plugin.Plugin;
 import tk.mctechniclp.devathlon2.listeners.JoinListener;
+import tk.mctechniclp.devathlon2.listeners.PingListener;
 
 public class Main extends Plugin {
 	
@@ -23,6 +24,7 @@ public class Main extends Plugin {
 	
 	private void registerListeners() {
 		BungeeCord.getInstance().getPluginManager().registerListener(this, new JoinListener());
+		BungeeCord.getInstance().getPluginManager().registerListener(this, new PingListener());
 	}
 	
 	private void registerCommands() {
