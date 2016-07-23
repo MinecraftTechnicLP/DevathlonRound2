@@ -2,9 +2,16 @@ package tk.mctechniclp.devathlon2;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.util.Arrays;
 
+import javassist.ClassPool;
+import javassist.CtClass;
+import javassist.CtMethod;
+import javassist.CtNewMethod;
 import net.md_5.bungee.BungeeCord;
+import net.md_5.bungee.api.ProxyServer;
+import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.plugin.Plugin;
 import net.md_5.bungee.config.Configuration;
 import net.md_5.bungee.config.ConfigurationProvider;
@@ -12,6 +19,7 @@ import net.md_5.bungee.config.YamlConfiguration;
 import tk.mctechniclp.devathlon2.listeners.ChannelListener;
 import tk.mctechniclp.devathlon2.listeners.JoinListener;
 import tk.mctechniclp.devathlon2.listeners.PingListener;
+import tk.mctechniclp.devathlon2.listeners.QuitListener;
 
 public class Main extends Plugin {
 	
@@ -25,6 +33,13 @@ public class Main extends Plugin {
 		registerListeners();
 		registerCommands();
 		
+		try {
+			Field f = ProxyServer.class.getDeclaredField("instance");
+			f.setAccessible(true);
+			f.set(null, new CustomBungeeCord());
+		} catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException | IOException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	@Override
@@ -37,6 +52,7 @@ public class Main extends Plugin {
 		BungeeCord.getInstance().getPluginManager().registerListener(this, new JoinListener());
 		BungeeCord.getInstance().getPluginManager().registerListener(this, new PingListener());
 		BungeeCord.getInstance().getPluginManager().registerListener(this, new ChannelListener());
+		BungeeCord.getInstance().getPluginManager().registerListener(this, new QuitListener());
 	}
 	
 	private void registerCommands() {
@@ -61,6 +77,7 @@ public class Main extends Plugin {
 				config.set("MOTD", "&bSelected Server: &6&l{serverName}");
 				config.set("errorMOTD", "&4The selected Server: &l&c{serverName} &4is not online \n and now new server can be run due lag of memory");
 				config.set("errorVersion", "Server is offline");
+				config.set("fallbackServerName", "lobby");
 				
 				ConfigurationProvider.getProvider(YamlConfiguration.class).save(config, file);
 			} else {
