@@ -2,6 +2,7 @@ package tk.mctechniclp.devathlon2;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 
 import net.md_5.bungee.BungeeCord;
 import net.md_5.bungee.api.plugin.Plugin;
@@ -53,11 +54,13 @@ public class Main extends Plugin {
 				
 				config.set("minPort", 25668);
 				config.set("maxPort", 30000);
-				config.set("lockedPorts", new int[] {12345, 23456});
+				config.set("blockedPorts", Arrays.asList(new int[] {12345, 23456}));
 				config.set("host", "localhost");
 				config.set("maxRAMPerServer", "512");
 				config.set("maxTotalRAM", "2048");
 				config.set("MOTD", "&bSelected Server: &6&l{serverName}");
+				config.set("errorMOTD", "&4The selected Server: &l&c{serverName} &4is not online \n and now new server can be run due lag of memory");
+				config.set("errorVersion", "Server is offline");
 				
 				ConfigurationProvider.getProvider(YamlConfiguration.class).save(config, file);
 			} else {

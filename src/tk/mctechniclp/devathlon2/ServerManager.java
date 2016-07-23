@@ -8,6 +8,7 @@ import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.UUID;
@@ -20,25 +21,33 @@ import net.md_5.bungee.api.config.ServerInfo;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 
 public class ServerManager {
-	/** TODO: Make configurable */
-	private static int port = Main.getConfig().getInt("minPort");
-	private static int maxPort = Main.getConfig().getInt("minPort");
+	private static int minPort = Main.getConfig().getInt("minPort");
+	private static int maxPort = Main.getConfig().getInt("maxPort");
+	private static List<Integer> blockedPorts = Main.getConfig().getIntList("blockedPorts");
 	private static int ramPerServer = Main.getConfig().getInt("maxRAMPerServer");
+	private static int totalRam = Main.getConfig().getInt("maxTotalRAM");
+	private static int usedRam = 0;
 	private static String host = Main.getConfig().getString("host");
 	
 	private static ArrayList<String> startingServers = new ArrayList<String>();
 	private static HashMap<UUID, String> waitingPlayers = new HashMap<UUID, String>();
+	private static ArrayList<Integer> usedPorts = new ArrayList<Integer>();
+	
 	
 	public static void reconnectPlayer(ProxiedPlayer p, String serverName) {
 		if(!ProxyServer.getInstance().getServers().containsKey(serverName)) {
 			if(!startingServers.contains(serverName)) startServer(serverName);
 			waitingPlayers.put(p.getUniqueId(), serverName);
 		}
-		
+		p.connect(ProxyServer.getInstance().getServers().get(serverName));
 	}
 	
 	private static void startServer(String name) {
 		startingServers.add(name);
+		usedRam += ramPerServer;
+		
+		int port = getAvailabelPort();
+		if(port == -1) return;
 		
 		/** Start Bukkit Server */
 		File serverDir = new File("../" + name);
@@ -46,7 +55,7 @@ public class ServerManager {
 		
 		if(!serverDir.exists()) {
 			serverDir.mkdir();
-			addProperties(serverDir);
+			addProperties(serverDir, port);
 			copyDirectory(templateDir, serverDir);
 		}
 		
@@ -63,10 +72,9 @@ public class ServerManager {
 		ServerInfo serverInfo = ProxyServer.getInstance().constructServerInfo(name, new InetSocketAddress(host, port), "Servername: " + name, false);
 		ProxyServer.getInstance().getServers().put(name, serverInfo);
 		
-		
-		port++;
 		startingServers.remove(name);
 		
+		/** Connect waiting Players*/
 		Iterator<Entry<UUID, String>> iter = waitingPlayers.entrySet().iterator();
 		
 		while (iter.hasNext()) {
@@ -81,6 +89,7 @@ public class ServerManager {
 	
 	public static void unregisterServer(String name) {
 		ProxyServer.getInstance().getServers().remove(name);
+		usedRam -= ramPerServer;
 	}
 	
 	private static void copyDirectory(File from, File to) {
@@ -101,7 +110,7 @@ public class ServerManager {
 		}
 	}
 	
-	private static void addProperties(File toDirectory) {
+	private static void addProperties(File toDirectory, int port) {
 		try {
 			FileInputStream in = new FileInputStream("../server.properties");
 			Properties props = new Properties();
@@ -117,5 +126,23 @@ public class ServerManager {
 			e.printStackTrace();
 		}
 	}
-
+	
+	private static int getAvailabelPort() {
+		for(int i = minPort; i <= maxPort; i++) {
+			if(usedPorts.contains(i) || blockedPorts.contains(i)) continue;
+			usedPorts.add(i);
+			return i;
+		}
+		System.err.println("No port availabel! Maybe the configured range is to small?");
+		return -1;
+	}
+	
+	public static boolean hasRAMForNextServer() {
+		return usedRam + ramPerServer <= totalRam;
+	}
+	
+	public static boolean isRunningServer(String name) {
+		return BungeeCord.getInstance().getServers().containsKey(name);
+	}
+	
 }
