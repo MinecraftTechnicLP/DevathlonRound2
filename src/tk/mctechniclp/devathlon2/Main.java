@@ -11,7 +11,6 @@ public class Main extends Plugin {
 	@Override
 	public void onEnable() {
 		INSTANCE = this;
-		System.out.println(getDataFolder());
 		registerListeners();
 		registerCommands();
 	}
