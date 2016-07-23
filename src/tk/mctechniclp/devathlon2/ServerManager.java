@@ -5,12 +5,19 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map.Entry;
 import java.util.Properties;
+import java.util.UUID;
 
 import com.google.common.io.Files;
 
+import net.md_5.bungee.BungeeCord;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.config.ServerInfo;
+import net.md_5.bungee.api.connection.ProxiedPlayer;
 
 public class ServerManager {
 	/** TODO: Make configurable */
@@ -18,13 +25,22 @@ public class ServerManager {
 	private static int ramPerServer = 512;
 	private static String host = "localhost";
 	
+	private static ArrayList<String> startingServers = new ArrayList<String>();
+	private static HashMap<UUID, String> waitingPlayers = new HashMap<UUID, String>();
 	
+	public static void reconnectPlayer(ProxiedPlayer p, String serverName) {
+		if(!ProxyServer.getInstance().getServers().containsKey(serverName)) {
+			if(!startingServers.contains(serverName)) startServer(serverName);
+			waitingPlayers.put(p.getUniqueId(), serverName);
+		}
+	}
 	
-	public static void startServer(String name, String motd) {
-		/** Connect to BungeeCord */
-		ServerInfo serverInfo = ProxyServer.getInstance().constructServerInfo(name, new InetSocketAddress(host, port), motd, false);
-		ProxyServer.getInstance().getServers().put(name, serverInfo);
+	private static void startServer(String name) {
+		startingServers.add(name);
 		
+		/** Connect to BungeeCord */
+		ServerInfo serverInfo = ProxyServer.getInstance().constructServerInfo(name, new InetSocketAddress(host, port), "Servername: " + name, false);
+		ProxyServer.getInstance().getServers().put(name, serverInfo);
 		
 		
 		/** Start Bukkit Server */
@@ -47,6 +63,24 @@ public class ServerManager {
 		}
 		
 		port++;
+		startingServers.remove(name);
+		
+		Iterator<Entry<UUID, String>> iter = waitingPlayers.entrySet().iterator();
+		
+		while (iter.hasNext()) {
+		    Entry<UUID, String> e = iter.next();
+		    
+		    if(e.getValue().equals(name)) {
+				BungeeCord.getInstance().getPlayer(e.getKey()).connect(serverInfo);
+				waitingPlayers.remove(e);
+			}
+		}
+	}
+	
+	public static void stopServer(String name) {
+		ProxyServer.getInstance().getServers().get(name);
+		//TODO CONTINUE
+		
 	}
 	
 	private static void copyDirectory(File from, File to) {
