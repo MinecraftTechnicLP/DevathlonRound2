@@ -13,7 +13,11 @@ public class JoinListener implements Listener {
 		String[] parts = ev.getPlayer().getPendingConnection().getVirtualHost().getHostString().split("\\.");
 		
 		if(parts.length == 3) {
-			ServerManager.reconnectPlayer(ev.getPlayer(), parts[0].toLowerCase());
+			if(ServerManager.hasRAMForNextServer() || ServerManager.isRunningServer(parts[0])) {
+				ServerManager.reconnectPlayer(ev.getPlayer(), parts[0].toLowerCase());
+			} else {
+				ev.getPlayer().disconnect();
+			}
 		}
 	}
 	

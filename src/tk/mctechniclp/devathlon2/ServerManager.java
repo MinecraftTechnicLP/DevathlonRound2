@@ -36,9 +36,15 @@ public class ServerManager {
 	
 	
 	public static void reconnectPlayer(ProxiedPlayer p, String serverName) {
+		System.out.println(ProxyServer.getInstance().getServers().containsKey(serverName));
+		
 		if(!ProxyServer.getInstance().getServers().containsKey(serverName)) {
-			if(!startingServers.contains(serverName)) startServer(serverName);
-			waitingPlayers.put(p.getUniqueId(), serverName);
+			System.out.println(startingServers.contains(serverName));
+			System.out.println(serverName);
+			if(!startingServers.contains(serverName)) {
+				waitingPlayers.put(p.getUniqueId(), serverName);
+				startServer(serverName);
+			}
 		}
 		p.connect(ProxyServer.getInstance().getServers().get(serverName));
 	}
@@ -82,6 +88,7 @@ public class ServerManager {
 		    Entry<UUID, String> e = iter.next();
 		    
 		    if(e.getValue().equals(name)) {
+		    	System.out.println("connect: " + BungeeCord.getInstance().getPlayer(e.getKey()).getDisplayName());
 				BungeeCord.getInstance().getPlayer(e.getKey()).connect(serverInfo);
 				waitingPlayers.remove(e);
 			}

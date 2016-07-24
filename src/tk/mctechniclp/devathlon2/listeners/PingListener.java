@@ -30,7 +30,7 @@ public class PingListener implements Listener {
 			try {
 				ping.setFavicon(Favicon.create(ImageIO.read(new File(Main.getInstance().getDataFolder() + "/success.png"))));
 			} catch (IOException e) {
-				e.printStackTrace();
+				System.out.println("No favicon found. To use dynamic favicons, create a 64x64 pixel image named success.png in the DevathlonRound2 folder.");
 			}
 		} else {
 			ping.setDescription(ChatColor.translateAlternateColorCodes('&', Main.getConfig().getString("errorMOTD").replace("{serverName}", parts[0])));
@@ -42,7 +42,7 @@ public class PingListener implements Listener {
 			try {
 				ping.setFavicon(Favicon.create(ImageIO.read(new File(Main.getInstance().getDataFolder() + "/fail.png"))));
 			} catch (IOException e) {
-				e.printStackTrace();
+				System.out.println("No favicon found. To use dynamic favicons, create a 64x64 pixel image named fail.png in the DevathlonRound2 folder.");
 			}
 		}
 	}

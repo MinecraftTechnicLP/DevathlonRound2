@@ -65,7 +65,6 @@ public class Main extends Plugin {
 				config.set("minPort", 25668);
 				config.set("maxPort", 30000);
 				config.set("blockedPorts", Arrays.asList(new int[] {12345, 23456}));
-				config.set("socketPort", 1337);
 				config.set("host", "localhost");
 				config.set("maxRAMPerServer", 512);
 				config.set("maxTotalRAM", 2048);
