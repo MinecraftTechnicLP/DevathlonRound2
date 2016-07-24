@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 import com.google.common.io.Files;
 
@@ -32,16 +33,11 @@ public class ServerManager {
 	
 	private static ArrayList<String> startingServers = new ArrayList<String>();
 	private static HashMap<UUID, String> waitingPlayers = new HashMap<UUID, String>();
-	private static ArrayList<Integer> usedPorts = new ArrayList<Integer>();
+	private static HashMap<String, Integer> ports = new HashMap<String, Integer>();
 	
 	
 	public static void reconnectPlayer(ProxiedPlayer p, String serverName) {
-		System.out.println(ProxyServer.getInstance().getServers().containsKey(serverName));
-		
 		if(!ProxyServer.getInstance().getServers().containsKey(serverName)) {
-			System.out.println(startingServers.contains(serverName));
-			System.out.println(serverName);
-			
 			waitingPlayers.put(p.getUniqueId(), serverName);
 			if(!startingServers.contains(serverName)) {
 				startServer(serverName);
@@ -51,11 +47,11 @@ public class ServerManager {
 		}
 	}
 	
-	private static void startServer(String name) {
+	private static void startServer(final String name) {
 		startingServers.add(name);
 		usedRam += ramPerServer;
 		
-		int port = getAvailabelPort();
+		int port = getPortFor(name);
 		if(port == -1) return;
 		
 		/** Start Bukkit Server */
@@ -78,27 +74,34 @@ public class ServerManager {
 		}
 		
 		/** Connect to BungeeCord */
-		ServerInfo serverInfo = ProxyServer.getInstance().constructServerInfo(name, new InetSocketAddress(host, port), ChatColor.translateAlternateColorCodes('&', Main.getConfig().getString("MOTD").replace("{serverName}", name)), false);
+		final ServerInfo serverInfo = ProxyServer.getInstance().constructServerInfo(name, new InetSocketAddress(host, port), ChatColor.translateAlternateColorCodes('&', Main.getConfig().getString("MOTD").replace("{serverName}", name)), false);
 		ProxyServer.getInstance().getServers().put(name, serverInfo);
 		
 		startingServers.remove(name);
 		
-		/** Connect waiting Players*/
-		Iterator<Entry<UUID, String>> iter = waitingPlayers.entrySet().iterator();
 		
-		while (iter.hasNext()) {
-		    Entry<UUID, String> e = iter.next();
-		    
-		    if(e.getValue().equals(name)) {
-		    	System.out.println("connect: " + BungeeCord.getInstance().getPlayer(e.getKey()).getDisplayName());
-				BungeeCord.getInstance().getPlayer(e.getKey()).connect(serverInfo);
-				waitingPlayers.remove(e);
+		/** Connect waiting Players*/
+		BungeeCord.getInstance().getScheduler().schedule(Main.getInstance(), new Runnable() {
+
+			@Override
+			public void run() {
+				Iterator<Entry<UUID, String>> iter = waitingPlayers.entrySet().iterator();
+				
+				while (iter.hasNext()) {
+				    Entry<UUID, String> e = iter.next();
+				    
+				    if(e.getValue().equals(name)) {
+						BungeeCord.getInstance().getPlayer(e.getKey()).connect(serverInfo);
+						waitingPlayers.remove(e);
+					}
+				}
 			}
-		}
+			
+		}, 10, TimeUnit.SECONDS);
+
 	}
 	
 	public static void unregisterServer(String name) {
-		System.out.println("Unregister: " + name);
 		ProxyServer.getInstance().getServers().remove(name);
 		usedRam -= ramPerServer;
 	}
@@ -138,10 +141,12 @@ public class ServerManager {
 		}
 	}
 	
-	private static int getAvailabelPort() {
+	private static int getPortFor(String serverName) {
+		if(ports.containsKey(serverName)) return ports.get(serverName);
+		
 		for(int i = minPort; i <= maxPort; i++) {
-			if(usedPorts.contains(i) || blockedPorts.contains(i)) continue;
-			usedPorts.add(i);
+			if(ports.containsValue(i) || blockedPorts.contains(i)) continue;
+			ports.put(serverName, i);
 			return i;
 		}
 		System.err.println("No port availabel! Maybe the configured range is to small?");

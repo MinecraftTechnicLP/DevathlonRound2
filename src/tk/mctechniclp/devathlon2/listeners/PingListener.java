@@ -17,7 +17,6 @@ import tk.mctechniclp.devathlon2.ServerManager;
 
 public class PingListener implements Listener {
 	
-	@SuppressWarnings("deprecation")
 	@EventHandler
 	public void onPing(ProxyPingEvent ev) {
 		String[] parts = ev.getConnection().getVirtualHost().getHostString().split("\\.");
