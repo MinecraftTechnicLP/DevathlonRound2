@@ -16,6 +16,7 @@ import java.util.UUID;
 import com.google.common.io.Files;
 
 import net.md_5.bungee.BungeeCord;
+import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.config.ServerInfo;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
@@ -69,7 +70,7 @@ public class ServerManager {
 		}
 		
 		/** Connect to BungeeCord */
-		ServerInfo serverInfo = ProxyServer.getInstance().constructServerInfo(name, new InetSocketAddress(host, port), "Servername: " + name, false);
+		ServerInfo serverInfo = ProxyServer.getInstance().constructServerInfo(name, new InetSocketAddress(host, port), ChatColor.translateAlternateColorCodes('&', Main.getConfig().getString("MOTD").replace("{serverName}", name)), false);
 		ProxyServer.getInstance().getServers().put(name, serverInfo);
 		
 		startingServers.remove(name);

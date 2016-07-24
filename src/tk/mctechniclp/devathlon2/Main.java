@@ -2,16 +2,9 @@ package tk.mctechniclp.devathlon2;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Field;
 import java.util.Arrays;
 
-import javassist.ClassPool;
-import javassist.CtClass;
-import javassist.CtMethod;
-import javassist.CtNewMethod;
 import net.md_5.bungee.BungeeCord;
-import net.md_5.bungee.api.ProxyServer;
-import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.plugin.Plugin;
 import net.md_5.bungee.config.Configuration;
 import net.md_5.bungee.config.ConfigurationProvider;
@@ -33,13 +26,14 @@ public class Main extends Plugin {
 		registerListeners();
 		registerCommands();
 		
-		try {
+		
+		/*try {
 			Field f = ProxyServer.class.getDeclaredField("instance");
 			f.setAccessible(true);
 			f.set(null, new CustomBungeeCord());
 		} catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException | IOException e) {
 			e.printStackTrace();
-		}
+		}*/
 	}
 	
 	@Override
@@ -71,11 +65,12 @@ public class Main extends Plugin {
 				config.set("minPort", 25668);
 				config.set("maxPort", 30000);
 				config.set("blockedPorts", Arrays.asList(new int[] {12345, 23456}));
+				config.set("socketPort", 1337);
 				config.set("host", "localhost");
-				config.set("maxRAMPerServer", "512");
-				config.set("maxTotalRAM", "2048");
+				config.set("maxRAMPerServer", 512);
+				config.set("maxTotalRAM", 2048);
 				config.set("MOTD", "&bSelected Server: &6&l{serverName}");
-				config.set("errorMOTD", "&4The selected Server: &l&c{serverName} &4is not online \n and now new server can be run due lag of memory");
+				config.set("errorMOTD", "&4The selected Server: &l&c{serverName} &4is not online\nand no new server can be run due lag of memory");
 				config.set("errorVersion", "Server is offline");
 				config.set("fallbackServerName", "lobby");
 				
