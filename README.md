@@ -13,7 +13,7 @@ Project for the second round of [GommeHD.net's Devathlon 2016] (https://www.gomm
      - [x] Tried getting incoming packets on the spigot server to cancel kick
      - [x] Tried using all kinds of events to prevent kicking
      - [x] Tried listening to the BungeeCord channel for kicking
-     - [x] Tried decompiling disconnec0() method, failed to decompile unsafe
+     - [x] Tried decompiling disconnect0() method, failed to decompile unsafe
 - [x] The MOTD has to work, even if the server is offline
 - [x] Do not create servers if hardware is already used
 
