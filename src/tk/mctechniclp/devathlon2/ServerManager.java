@@ -41,12 +41,14 @@ public class ServerManager {
 		if(!ProxyServer.getInstance().getServers().containsKey(serverName)) {
 			System.out.println(startingServers.contains(serverName));
 			System.out.println(serverName);
+			
+			waitingPlayers.put(p.getUniqueId(), serverName);
 			if(!startingServers.contains(serverName)) {
-				waitingPlayers.put(p.getUniqueId(), serverName);
 				startServer(serverName);
 			}
+		} else {
+			p.connect(ProxyServer.getInstance().getServers().get(serverName));
 		}
-		p.connect(ProxyServer.getInstance().getServers().get(serverName));
 	}
 	
 	private static void startServer(String name) {
@@ -96,6 +98,7 @@ public class ServerManager {
 	}
 	
 	public static void unregisterServer(String name) {
+		System.out.println("Unregister: " + name);
 		ProxyServer.getInstance().getServers().remove(name);
 		usedRam -= ramPerServer;
 	}

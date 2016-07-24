@@ -9,7 +9,6 @@ import net.md_5.bungee.api.plugin.Plugin;
 import net.md_5.bungee.config.Configuration;
 import net.md_5.bungee.config.ConfigurationProvider;
 import net.md_5.bungee.config.YamlConfiguration;
-import tk.mctechniclp.devathlon2.listeners.ChannelListener;
 import tk.mctechniclp.devathlon2.listeners.JoinListener;
 import tk.mctechniclp.devathlon2.listeners.PingListener;
 import tk.mctechniclp.devathlon2.listeners.QuitListener;
@@ -34,6 +33,7 @@ public class Main extends Plugin {
 		} catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException | IOException e) {
 			e.printStackTrace();
 		}*/
+
 	}
 	
 	@Override
@@ -45,7 +45,6 @@ public class Main extends Plugin {
 	private void registerListeners() {
 		BungeeCord.getInstance().getPluginManager().registerListener(this, new JoinListener());
 		BungeeCord.getInstance().getPluginManager().registerListener(this, new PingListener());
-		BungeeCord.getInstance().getPluginManager().registerListener(this, new ChannelListener());
 		BungeeCord.getInstance().getPluginManager().registerListener(this, new QuitListener());
 	}
 	
